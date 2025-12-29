@@ -16,7 +16,36 @@ local Player = Players.LocalPlayer
 local PlayerGui = Player:WaitForChild("PlayerGui")
 
 -- [[ CONFIGURATION ]]
-local SERVER_URL = "https://sosixglobal.onrender.com"
+local SERVER_URL = "--[[ 
+             SOSIX GLOBAL WITH SOSIX AI
+    always check your console if the script is working
+]]--
+local SERVER_URL = "https://sosixglobal-bj2h.onrender.com/load_sonix"
+
+print("[SOSIX]: Executing script")
+
+local success, scriptContent = pcall(function()
+    return game:HttpGet(SERVER_URL)
+end)
+
+if success and scriptContent ~= "" then
+    -- Check if the server returned an error message instead of code
+    if string.find(scriptContent, "404") or string.find(scriptContent, "Not Found") then
+        warn("[SOSIX]: Error 404")
+    else
+        local func, err = loadstring(scriptContent)
+        if func then
+            print("[SOSIX]: Script Received. Executing...")
+            task.spawn(func)
+        else
+            warn("[SOSIX]: Lua Syntax Error! Check line 89 on GitHub.")
+            print("Roblox Error: " .. tostring(err))
+        end
+    end
+else
+    warn("[SOSIX]: Connection Failed! Render is likely sleeping.")
+    print("Pls wait a sec and re-excute again server maybe maintenance .")
+end"
 local lastTimestamp = 0 
 local canSend = true
 local COOLDOWN_TIME = 3
