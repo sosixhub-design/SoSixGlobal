@@ -461,7 +461,7 @@
 
     <div class="home-top" style="margin-bottom:20px;">
       <div class="search-bar">
-        <input type="text" id="robloxIdInput" placeholder="Enter Roblox Player ID...">
+        <input type="text" id="robloxIdInput" placeholder="Player ID or profile link...">
       </div>
       <button class="upload-open-btn" onclick="loadRobloxProfile()">Load Profile</button>
     </div>
@@ -787,19 +787,43 @@
   // Roblox profile lookup — Roblox's API blocks direct browser requests (no CORS),
   // so requests are routed through a public CORS proxy. Swap PROXY for your own
   // backend if you need this to be reliable long-term.
-  const PROXY = 'https://api.allorigins.win/raw?url=';
+  const PROXIES = [
+    'https://api.codetabs.com/v1/proxy/?quest=',
+    'https://api.allorigins.win/raw?url='
+  ];
+
+  async function proxyFetch(targetUrl) {
+    let lastErr;
+    for (const proxy of PROXIES) {
+      try {
+        const res = await fetch(proxy + encodeURIComponent(targetUrl));
+        if (res.ok) return res;
+        lastErr = new Error('Bad response');
+      } catch (err) {
+        lastErr = err;
+      }
+    }
+    throw lastErr;
+  }
 
   async function loadRobloxProfile() {
     const id = document.getElementById('robloxIdInput').value.trim();
     await connectRoblox(id);
   }
 
-  async function connectRoblox(id) {
+  async function connectRoblox(rawInput) {
     const status = document.getElementById('robloxStatus');
     const card = document.getElementById('robloxCard');
 
+    // Accept a raw ID or a full profile URL like roblox.com/users/2523491713/profile
+    let id = (rawInput || '').trim();
+    const urlMatch = id.match(/roblox\.com\/users\/(\d+)/i);
+    if (urlMatch) {
+      id = urlMatch[1];
+    }
+
     if (!id || isNaN(id)) {
-      status.textContent = 'Enter a valid numeric Roblox player ID.';
+      status.textContent = 'Enter a valid Roblox player ID or profile link.';
       card.style.display = 'none';
       return;
     }
@@ -808,11 +832,11 @@
     card.style.display = 'none';
 
     try {
-      const userRes = await fetch(PROXY + encodeURIComponent(`https://users.roblox.com/v1/users/${id}`));
+      const userRes = await proxyFetch(`https://users.roblox.com/v1/users/${id}`);
       if (!userRes.ok) throw new Error('User not found');
       const user = await userRes.json();
 
-      const avatarRes = await fetch(PROXY + encodeURIComponent(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${id}&size=420x420&format=Png&isCircular=false`));
+      const avatarRes = await proxyFetch(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${id}&size=420x420&format=Png&isCircular=false`);
       const avatarData = await avatarRes.json();
       const avatarUrl = avatarData.data && avatarData.data[0] ? avatarData.data[0].imageUrl : '';
 
