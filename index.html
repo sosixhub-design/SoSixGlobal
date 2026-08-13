@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Nav Bar</title>
+<style>
+  * {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  button {
+    outline: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  button:focus,
+  button:active {
+    outline: none;
+  }
+
+  body {
+    margin: 0;
+    background: #000000;
+    color: #00ff66;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 18px;
+    background: #000000;
+    border-bottom: 1px solid #00ff66;
+  }
+
+  .app-name {
+    font-size: 20px;
+    font-weight: bold;
+    color: #00ff66;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 10px;
+  }
+
+  .nav-btn {
+    background: none;
+    border: none;
+    color: #00ff66;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    padding: 6px 14px;
+    border-radius: 8px;
+    transition: 0.2s ease;
+  }
+
+  .nav-btn svg {
+    width: 26px;
+    height: 26px;
+    stroke: #00ff66;
+    fill: none;
+    stroke-width: 1.8;
+  }
+
+  .nav-btn:hover,
+  .nav-btn.active {
+    background: #00ff66;
+    color: #000000;
+  }
+
+  .nav-btn:hover svg,
+  .nav-btn.active svg {
+    stroke: #000000;
+  }
+
+  main {
+    padding: 30px;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  .page {
+    display: none;
+  }
+
+  .page.active {
+    display: block;
+  }
+
+  .home-top {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+
+  .search-bar {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 2px solid #00ff66;
+    border-radius: 8px;
+    padding: 8px 12px;
+  }
+
+  .search-bar svg {
+    width: 18px;
+    height: 18px;
+    stroke: #00ff66;
+    fill: none;
+    stroke-width: 2;
+    flex-shrink: 0;
+  }
+
+  .search-bar input {
+    background: none;
+    border: none;
+    outline: none;
+    color: #00ff66;
+    font-size: 14px;
+    width: 100%;
+  }
+
+  .search-bar input::placeholder {
+    color: #00994d;
+  }
+
+  .upload-open-btn {
+    background: #00ff66;
+    color: #000000;
+    border: none;
+    border-radius: 8px;
+    padding: 0 18px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .upload-open-btn:hover {
+    background: #00cc52;
+  }
+
+  /* Script cards */
+  .script-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .script-card {
+    border: 2px solid #00ff66;
+    border-radius: 8px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: 0.15s ease;
+  }
+
+  .script-card:hover {
+    background: #001a0d;
+  }
+
+  .script-card .top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .script-card .game-name {
+    font-size: 16px;
+    font-weight: bold;
+    color: #00ff66;
+  }
+
+  .badge {
+    font-size: 11px;
+    font-weight: bold;
+    border: 1px solid #00ff66;
+    border-radius: 5px;
+    padding: 2px 8px;
+    color: #00ff66;
+  }
+
+  .badge.free { border-color: #00ff66; color: #00ff66; }
+  .badge.paid { border-color: #ffcc00; color: #ffcc00; }
+  .badge.key  { border-color: #00ccff; color: #00ccff; }
+
+  .script-card .meta-row {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 6px;
+    font-size: 12px;
+    color: #00994d;
+  }
+
+  .empty-msg {
+    color: #00994d;
+    font-size: 13px;
+    text-align: center;
+    padding: 30px 0;
+  }
+
+  /* Slide-up upload panel */
+  .overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 10;
+  }
+
+  .overlay.active {
+    display: block;
+  }
+
+  .slide-panel {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: -100%;
+    background: #000000;
+    border-top: 2px solid #00ff66;
+    border-radius: 16px 16px 0 0;
+    padding: 20px;
+    max-width: 700px;
+    margin: 0 auto;
+    z-index: 11;
+    transition: bottom 0.3s ease;
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+
+  .slide-panel.active {
+    bottom: 0;
+  }
+
+  .slide-panel h3 {
+    margin-top: 0;
+    text-align: center;
+  }
+
+  .field {
+    margin-bottom: 14px;
+  }
+
+  .field label {
+    display: block;
+    font-size: 12px;
+    color: #00994d;
+    margin-bottom: 4px;
+  }
+
+  .field input[type="text"],
+  .field select,
+  .field textarea {
+    width: 100%;
+    background: #000000;
+    color: #00ff66;
+    border: 1px solid #00ff66;
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-size: 13px;
+    outline: none;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+
+  .field textarea {
+    font-family: monospace;
+    min-height: 120px;
+    resize: vertical;
+  }
+
+  .field select option {
+    background: #000000;
+  }
+
+  .file-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 6px;
+  }
+
+  .file-btn {
+    background: none;
+    border: 1px solid #00ff66;
+    color: #00ff66;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+
+  .file-btn:hover {
+    background: #00ff66;
+    color: #000000;
+  }
+
+  input[type="file"] {
+    display: none;
+  }
+
+  .panel-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+  }
+
+  .submit-btn, .cancel-btn {
+    flex: 1;
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    border: 2px solid #00ff66;
+  }
+
+  .submit-btn {
+    background: #00ff66;
+    color: #000000;
+  }
+
+  .submit-btn:hover {
+    background: #00cc52;
+  }
+
+  .cancel-btn {
+    background: none;
+    color: #00ff66;
+  }
+
+  .cancel-btn:hover {
+    background: #00ff66;
+    color: #000000;
+  }
+
+  /* Script view popup */
+  .view-panel {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 50%;
+    transform: translate(0, -50%) scale(0.9);
+    background: #000000;
+    border: 2px solid #00ff66;
+    border-radius: 12px;
+    padding: 20px;
+    max-width: 600px;
+    width: 90%;
+    margin: 0 auto;
+    z-index: 11;
+    max-height: 80vh;
+    overflow-y: auto;
+    opacity: 0;
+    pointer-events: none;
+    transition: 0.2s ease;
+  }
+
+  .view-panel.active {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translate(0, -50%) scale(1);
+  }
+
+  .view-panel h3 {
+    margin-top: 0;
+    color: #00ff66;
+  }
+
+  .view-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    font-size: 12px;
+    color: #00994d;
+    margin-bottom: 12px;
+  }
+
+  .view-code {
+    background: #050505;
+    border: 1px solid #00ff66;
+    border-radius: 6px;
+    padding: 10px;
+    font-family: monospace;
+    font-size: 12px;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .close-btn {
+    margin-top: 14px;
+    width: 100%;
+    background: none;
+    border: 2px solid #00ff66;
+    color: #00ff66;
+    border-radius: 8px;
+    padding: 8px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+
+  .close-btn:hover {
+    background: #00ff66;
+    color: #000000;
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="app-name">MyApp</span>
+
+  <div class="nav-links">
+    <button class="nav-btn" data-page="home" onclick="showPage('home')">
+      <svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+      Home
+    </button>
+
+    <button class="nav-btn" data-page="chat" onclick="showPage('chat')">
+      <svg viewBox="0 0 24 24"><path d="M21 12c0 4.4-4 8-9 8-1.2 0-2.3-.2-3.4-.6L3 21l1.7-4.4C3.6 15.3 3 13.7 3 12c0-4.4 4-8 9-8s9 3.6 9 8z"/></svg>
+      Chat
+    </button>
+
+    <button class="nav-btn" data-page="profile" onclick="showPage('profile')">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      Profile
+    </button>
+  </div>
+</nav>
+
+<main>
+
+  <section id="home" class="page">
+    <div class="home-top">
+      <div class="search-bar">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input type="text" id="searchInput" placeholder="Search scripts..." oninput="renderScripts()">
+      </div>
+      <button class="upload-open-btn" onclick="openPanel()">+ Upload Lua Script</button>
+    </div>
+
+    <div class="script-list" id="scriptList"></div>
+  </section>
+
+  <section id="chat" class="page">
+    <h1>Chat</h1>
+    <p>This is your chat page content.</p>
+  </section>
+
+  <section id="profile" class="page">
+    <h1>Profile</h1>
+
+    <div class="home-top" style="margin-bottom:20px;">
+      <div class="search-bar">
+        <input type="text" id="robloxIdInput" placeholder="Enter Roblox Player ID...">
+      </div>
+      <button class="upload-open-btn" onclick="loadRobloxProfile()">Load Profile</button>
+    </div>
+
+    <div id="robloxStatus" style="font-size:12px;color:#00994d;margin-bottom:16px;"></div>
+
+    <div id="robloxCard" style="display:none; border:2px solid #00ff66; border-radius:10px; padding:18px; display:none;">
+      <div style="display:flex; gap:16px; align-items:center;">
+        <img id="robloxAvatar" src="" alt="avatar" style="width:90px; height:90px; border-radius:10px; border:2px solid #00ff66;">
+        <div>
+          <div id="robloxDisplayName" style="font-size:18px; font-weight:bold;"></div>
+          <div id="robloxUsername" style="font-size:13px; color:#00994d;"></div>
+          <div id="robloxId2" style="font-size:12px; color:#00994d;"></div>
+        </div>
+      </div>
+      <p id="robloxDescription" style="font-size:13px; margin-top:14px; white-space:pre-wrap;"></p>
+    </div>
+
+    <h3 style="margin-top:28px;">My Uploaded Scripts</h3>
+    <div class="script-list" id="myScriptList"></div>
+  </section>
+
+</main>
+
+<!-- Upload slide-up panel -->
+<div class="overlay" id="overlay" onclick="closePanel()"></div>
+
+<div class="slide-panel" id="slidePanel">
+  <h3 id="panelTitle">Upload Lua Script</h3>
+
+  <div class="field">
+    <label>Made by</label>
+    <div id="postingAsBox" style="display:flex; align-items:center; gap:10px; border:1px solid #00ff66; border-radius:6px; padding:8px 10px;">
+      <img id="postingAsAvatar" src="" style="width:28px; height:28px; border-radius:5px; display:none;">
+      <span id="postingAsName" style="font-size:13px;"></span>
+    </div>
+    <div id="notConnectedMsg" style="display:none; font-size:12px; color:#00994d; margin-top:6px;">
+      Connect your profile on the Profile tab to upload scripts.
+    </div>
+  </div>
+
+  <div id="uploadFields">
+  <div class="field">
+    <label>Game Name</label>
+    <input type="text" id="inputGame" placeholder="e.g. Blox Fruits">
+  </div>
+
+  <div class="field">
+    <label>Access Type</label>
+    <select id="inputType">
+      <option value="Free">Free</option>
+      <option value="Paid">Paid</option>
+      <option value="Key">Key</option>
+    </select>
+  </div>
+
+  <div class="field">
+    <label>Lua Script (paste or upload .lua file)</label>
+    <textarea id="inputScript" placeholder="-- paste your Lua script here"></textarea>
+    <div class="file-row">
+      <label class="file-btn" for="fileInput">Upload .lua File</label>
+      <input type="file" id="fileInput" accept=".lua,.txt">
+      <button class="file-btn" type="button" onclick="copyInputScript()">Copy</button>
+      <span id="fileNameLabel" style="font-size:12px;color:#00994d;"></span>
+    </div>
+  </div>
+  </div>
+
+  <div class="panel-actions">
+    <button class="cancel-btn" onclick="closePanel()">Cancel</button>
+    <button class="submit-btn" id="submitBtn" onclick="submitScript()">Post Script</button>
+  </div>
+</div>
+
+<!-- Script view popup -->
+<div class="view-panel" id="viewPanel">
+  <h3 id="viewGame"></h3>
+  <div class="view-meta">
+    <span id="viewUser"></span>
+    <span id="viewType"></span>
+    <span id="viewViews"></span>
+  </div>
+  <div class="view-code" id="viewCode"></div>
+  <button class="close-btn" id="viewCopyBtn" onclick="copyViewScript()" style="margin-top:10px; border-color:#00ff66;">Copy Script</button>
+  <button class="close-btn" onclick="closeView()">Close</button>
+</div>
+
+<script>
+  // In-memory script store (resets on page reload — hook up a backend for real persistence)
+  let scripts = [];
+  let nextId = 1;
+  let robloxUser = null; // set once a profile is connected
+  let editingId = null;  // set when the panel is in edit mode
+
+  function showPage(id) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.querySelector('.nav-btn[data-page="' + id + '"]').classList.add('active');
+    if (id === 'profile') renderMyScripts();
+  }
+
+  function openPanel() {
+    editingId = null;
+    document.getElementById('panelTitle').textContent = 'Upload Lua Script';
+    document.getElementById('submitBtn').textContent = 'Post Script';
+    document.getElementById('inputGame').value = '';
+    document.getElementById('inputType').value = 'Free';
+    document.getElementById('inputScript').value = '';
+    document.getElementById('fileInput').value = '';
+    document.getElementById('fileNameLabel').textContent = '';
+    updatePostingAsBox();
+    document.getElementById('overlay').classList.add('active');
+    document.getElementById('slidePanel').classList.add('active');
+  }
+
+  function updatePostingAsBox() {
+    const nameEl = document.getElementById('postingAsName');
+    const avatarEl = document.getElementById('postingAsAvatar');
+    const notConnectedMsg = document.getElementById('notConnectedMsg');
+    const fieldsBox = document.getElementById('uploadFields');
+    const submitBtn = document.getElementById('submitBtn');
+
+    if (robloxUser) {
+      nameEl.textContent = robloxUser.displayName + ' (@' + robloxUser.name + ')';
+      if (robloxUser.avatarUrl) {
+        avatarEl.src = robloxUser.avatarUrl;
+        avatarEl.style.display = 'inline-block';
+      }
+      notConnectedMsg.style.display = 'none';
+      fieldsBox.style.display = 'block';
+      submitBtn.disabled = false;
+      submitBtn.style.opacity = '1';
+    } else {
+      nameEl.textContent = 'Not connected';
+      avatarEl.style.display = 'none';
+      notConnectedMsg.style.display = 'block';
+      fieldsBox.style.display = 'none';
+      submitBtn.disabled = true;
+      submitBtn.style.opacity = '0.5';
+    }
+  }
+
+  function copyInputScript() {
+    const text = document.getElementById('inputScript').value;
+    if (!text) return;
+    navigator.clipboard.writeText(text);
+  }
+
+  function copyViewScript() {
+    const text = document.getElementById('viewCode').textContent;
+    if (!text) return;
+    navigator.clipboard.writeText(text);
+    const btn = document.getElementById('viewCopyBtn');
+    const original = btn.textContent;
+    btn.textContent = 'Copied!';
+    setTimeout(() => { btn.textContent = original; }, 1500);
+  }
+
+  function closePanel() {
+    document.getElementById('overlay').classList.remove('active');
+    document.getElementById('slidePanel').classList.remove('active');
+  }
+
+  document.getElementById('fileInput').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    document.getElementById('fileNameLabel').textContent = file.name;
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      document.getElementById('inputScript').value = evt.target.result;
+    };
+    reader.readAsText(file);
+  });
+
+  function submitScript() {
+    if (!robloxUser) {
+      alert('Connect your Roblox profile first.');
+      return;
+    }
+
+    const game = document.getElementById('inputGame').value.trim();
+    const type = document.getElementById('inputType').value;
+    const code = document.getElementById('inputScript').value.trim();
+
+    if (!game || !code) {
+      alert('Please enter a game name and a script.');
+      return;
+    }
+
+    if (editingId !== null) {
+      const s = scripts.find(x => x.id === editingId);
+      if (s) {
+        s.game = game;
+        s.type = type;
+        s.code = code;
+      }
+    } else {
+      scripts.unshift({
+        id: nextId++,
+        userId: robloxUser.id,
+        username: robloxUser.name,
+        game: game,
+        type: type,
+        code: code,
+        views: 0
+      });
+    }
+
+    editingId = null;
+    closePanel();
+    renderScripts();
+    renderMyScripts();
+  }
+
+  function editScript(id) {
+    const s = scripts.find(x => x.id === id);
+    if (!s) return;
+    editingId = id;
+    document.getElementById('panelTitle').textContent = 'Edit Lua Script';
+    document.getElementById('submitBtn').textContent = 'Save Changes';
+    document.getElementById('inputGame').value = s.game;
+    document.getElementById('inputType').value = s.type;
+    document.getElementById('inputScript').value = s.code;
+    document.getElementById('fileNameLabel').textContent = '';
+    updatePostingAsBox();
+    document.getElementById('overlay').classList.add('active');
+    document.getElementById('slidePanel').classList.add('active');
+  }
+
+  function deleteScript(id) {
+    if (!confirm('Delete this script? This cannot be undone.')) return;
+    scripts = scripts.filter(x => x.id !== id);
+    renderScripts();
+    renderMyScripts();
+  }
+
+  function renderScripts() {
+    const list = document.getElementById('scriptList');
+    const query = document.getElementById('searchInput').value.toLowerCase();
+    const filtered = scripts.filter(s =>
+      s.game.toLowerCase().includes(query) || s.username.toLowerCase().includes(query)
+    );
+
+    if (filtered.length === 0) {
+      list.innerHTML = '<div class="empty-msg">No scripts yet. Upload one to get started.</div>';
+      return;
+    }
+
+    list.innerHTML = filtered.map(s => `
+      <div class="script-card" onclick="viewScript(${s.id})">
+        <div class="top-row">
+          <span class="game-name">${escapeHtml(s.game)}</span>
+          <span class="badge ${s.type.toLowerCase()}">${s.type}</span>
+        </div>
+        <div class="meta-row">
+          <span>Made by ${escapeHtml(s.username)}</span>
+          <span>${s.views} views</span>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function renderMyScripts() {
+    const list = document.getElementById('myScriptList');
+    if (!list) return;
+
+    if (!robloxUser) {
+      list.innerHTML = '<div class="empty-msg">Connect your Roblox profile above to see your scripts.</div>';
+      return;
+    }
+
+    const mine = scripts.filter(s => s.userId === robloxUser.id);
+
+    if (mine.length === 0) {
+      list.innerHTML = '<div class="empty-msg">You haven\'t uploaded any scripts yet.</div>';
+      return;
+    }
+
+    list.innerHTML = mine.map(s => `
+      <div class="script-card">
+        <div class="top-row">
+          <span class="game-name">${escapeHtml(s.game)}</span>
+          <span class="badge ${s.type.toLowerCase()}">${s.type}</span>
+        </div>
+        <div class="meta-row">
+          <span>${s.views} views</span>
+          <span style="display:flex; gap:10px;">
+            <span onclick="event.stopPropagation(); editScript(${s.id})" style="text-decoration:underline; cursor:pointer;">Edit</span>
+            <span onclick="event.stopPropagation(); deleteScript(${s.id})" style="text-decoration:underline; cursor:pointer; color:#ff5555;">Delete</span>
+          </span>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function viewScript(id) {
+    const s = scripts.find(x => x.id === id);
+    if (!s) return;
+    s.views++; // update view count on every visit
+    renderScripts();
+
+    document.getElementById('viewGame').textContent = s.game;
+    document.getElementById('viewUser').textContent = 'Made by ' + s.username;
+    document.getElementById('viewType').textContent = s.type;
+    document.getElementById('viewViews').textContent = s.views + ' views';
+    document.getElementById('viewCode').textContent = s.code;
+    document.getElementById('overlay').classList.add('active');
+    document.getElementById('viewPanel').classList.add('active');
+  }
+
+  function closeView() {
+    document.getElementById('overlay').classList.remove('active');
+    document.getElementById('viewPanel').classList.remove('active');
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  // Roblox profile lookup — Roblox's API blocks direct browser requests (no CORS),
+  // so requests are routed through a public CORS proxy. Swap PROXY for your own
+  // backend if you need this to be reliable long-term.
+  const PROXY = 'https://api.allorigins.win/raw?url=';
+
+  async function loadRobloxProfile() {
+    const id = document.getElementById('robloxIdInput').value.trim();
+    await connectRoblox(id);
+  }
+
+  async function connectRoblox(id) {
+    const status = document.getElementById('robloxStatus');
+    const card = document.getElementById('robloxCard');
+
+    if (!id || isNaN(id)) {
+      status.textContent = 'Enter a valid numeric Roblox player ID.';
+      card.style.display = 'none';
+      return;
+    }
+
+    status.textContent = 'Loading...';
+    card.style.display = 'none';
+
+    try {
+      const userRes = await fetch(PROXY + encodeURIComponent(`https://users.roblox.com/v1/users/${id}`));
+      if (!userRes.ok) throw new Error('User not found');
+      const user = await userRes.json();
+
+      const avatarRes = await fetch(PROXY + encodeURIComponent(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${id}&size=420x420&format=Png&isCircular=false`));
+      const avatarData = await avatarRes.json();
+      const avatarUrl = avatarData.data && avatarData.data[0] ? avatarData.data[0].imageUrl : '';
+
+      document.getElementById('robloxAvatar').src = avatarUrl;
+      document.getElementById('robloxDisplayName').textContent = user.displayName || user.name;
+      document.getElementById('robloxUsername').textContent = '@' + user.name;
+      document.getElementById('robloxId2').textContent = 'ID: ' + user.id;
+      document.getElementById('robloxDescription').textContent = user.description || '(no bio)';
+
+      robloxUser = {
+        id: user.id,
+        name: user.name,
+        displayName: user.displayName || user.name,
+        avatarUrl: avatarUrl
+      };
+
+      card.style.display = 'block';
+      status.textContent = 'Connected as @' + user.name;
+      renderMyScripts();
+      updatePostingAsBox();
+    } catch (err) {
+      status.textContent = 'Could not load that profile. Check the ID and try again.';
+      card.style.display = 'none';
+    }
+  }
+
+  showPage('home');
+  renderScripts();
+  renderMyScripts();
+</script>
+
+</body>
+</html>
